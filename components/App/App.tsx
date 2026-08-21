@@ -1,0 +1,59 @@
+import css from './App.module.css';
+import NoteList from '../NoteList/NoteList';
+import { fetchNotes } from '@/lib/api';
+import Pagination from '../Pagination/Pagination';
+import SearchBox from '../SearchBox/SearchBox';
+import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+// import Modal from '../Modal/Modal';
+// import NoteForm from '../NoteForm/NoteForm';
+import { useDebouncedCallback } from 'use-debounce';
+import Link from 'next/link';
+
+export function App() {
+  const [page, setPage] = useState(1);
+  // const [isModalOpen, setIsModalOpen] = useState(false);
+  const [search, setSearch] = useState('');
+
+  //пошук реалізовуємо
+
+  const handleSearch = useDebouncedCallback((value: string) => {
+    setSearch(value);
+    setPage(1);
+  }, 300);
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['notes', page, search],
+    queryFn: () => fetchNotes({ page, search, perPage: 12 }),
+    placeholderData: previousValues => previousValues,
+  });
+  console.log(data);
+
+  return (
+    <div className={css.app}>
+      <header className={css.toolbar}>
+        <SearchBox onSearch={handleSearch}></SearchBox>
+        {isLoading && <p>Loading...</p>}
+
+        {error && <p>Error</p>}
+        <Link className={css.button} href="/notes/action/create"></Link>
+        {data && data.totalPages > 1 && (
+          <Pagination
+            page={page}
+            totalPages={data.totalPages}
+            onPageChange={setPage}
+          />
+        )}
+
+        {/* {isModalOpen && (
+          <Modal onClose={() => setIsModalOpen(false)}>
+            <NoteForm onClose={() => setIsModalOpen(false)}></NoteForm>
+          </Modal>
+        )} */}
+      </header>
+
+      {data && data.notes.length > 0 && <NoteList notes={data.notes} />}
+      {data && data.notes.length === 0 && <p>Notes not Found</p>}
+    </div>
+  );
+}
