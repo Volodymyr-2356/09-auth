@@ -1,4 +1,4 @@
-import type { Note, NoteTag } from '../types/note';
+import type { Note, NoteTag } from '@/types/note';
 import { nextServer } from './api';
 
 import axios from 'axios';
