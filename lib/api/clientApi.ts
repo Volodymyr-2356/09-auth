@@ -92,7 +92,46 @@ export async function fetchNoteById(id: string): Promise<Note> {
   return res.data;
 }
 
-export async function register() {
-  const res = await nextServer.post(`/auth/register`);
+interface RegisterData {
+  email: string;
+  password: string;
+}
+
+export async function register(data: RegisterData) {
+  const res = await nextServer.post('/auth/register', data);
+  return res.data;
+}
+
+interface LoginData {
+  email: string;
+  password: string;
+}
+
+export async function login(data: LoginData) {
+  const res = await nextServer.post('/auth/login', data);
+  return res.data;
+}
+
+export async function checkSession() {
+  const res = await nextServer.get('/auth/session');
+  return res.data;
+}
+
+export async function getMe() {
+  const res = await nextServer.get('/users/me');
+  return res.data;
+}
+
+export async function logout() {
+  const res = await nextServer.post('/auth/logout');
+  return res.data;
+}
+
+interface UpdateProfileData {
+  username: string;
+}
+
+export async function updateProfile(data: UpdateProfileData) {
+  const res = await nextServer.patch('/users/me', data);
   return res.data;
 }
