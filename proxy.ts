@@ -25,21 +25,31 @@ export async function proxy(request: NextRequest) {
   let isAuthenticated = false;
   let setCookies: string[] = [];
 
-  // Если есть хотя бы один токен,
-  // проверяем/восстанавливаем сессию
-  if (accessToken || refreshToken) {
+  // Якщо accessToken вже є —
+  // вважаємо користувача автентифікованим.
+  if (accessToken) {
+    isAuthenticated = true;
+  }
+
+  // Якщо accessToken відсутній, але є refreshToken —
+  // намагаємося поновити сесію.
+  if (!accessToken && refreshToken) {
     try {
       const session = await checkSession();
 
-      isAuthenticated = session.data.success;
-
       setCookies = session.headers['set-cookie'] ?? [];
+
+      const hasAccessToken = setCookies.some(cookie =>
+        cookie.startsWith('accessToken=')
+      );
+
+      isAuthenticated = hasAccessToken;
     } catch {
       isAuthenticated = false;
     }
   }
 
-  // Неавторизованный пользователь пытается открыть приватный маршрут
+  // Неавторизований користувач намагається відкрити приватний маршрут
   if (isPrivateRoute && !isAuthenticated) {
     const response = NextResponse.redirect(new URL('/sign-in', request.url));
 
@@ -50,7 +60,7 @@ export async function proxy(request: NextRequest) {
     return response;
   }
 
-  // Авторизованный пользователь пытается открыть публичный маршрут
+  // Авторизований користувач намагається відкрити публічний маршрут
   if (isPublicRoute && isAuthenticated) {
     const response = NextResponse.redirect(new URL('/', request.url));
 
@@ -60,9 +70,10 @@ export async function proxy(request: NextRequest) {
 
     return response;
   }
+
   const response = NextResponse.next();
 
-  // Передаём новые cookies от API браузеру
+  // Передаємо оновлені cookies від API браузеру
   for (const cookie of setCookies) {
     response.headers.append('set-cookie', cookie);
   }
