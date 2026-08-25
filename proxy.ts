@@ -41,14 +41,25 @@ export async function proxy(request: NextRequest) {
 
   // Неавторизованный пользователь пытается открыть приватный маршрут
   if (isPrivateRoute && !isAuthenticated) {
-    return NextResponse.redirect(new URL('/sign-in', request.url));
+    const response = NextResponse.redirect(new URL('/sign-in', request.url));
+
+    for (const cookie of setCookies) {
+      response.headers.append('set-cookie', cookie);
+    }
+
+    return response;
   }
 
   // Авторизованный пользователь пытается открыть публичный маршрут
   if (isPublicRoute && isAuthenticated) {
-    return NextResponse.redirect(new URL('/profile', request.url));
-  }
+    const response = NextResponse.redirect(new URL('/', request.url));
 
+    for (const cookie of setCookies) {
+      response.headers.append('set-cookie', cookie);
+    }
+
+    return response;
+  }
   const response = NextResponse.next();
 
   // Передаём новые cookies от API браузеру

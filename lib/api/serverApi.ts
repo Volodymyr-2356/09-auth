@@ -44,7 +44,18 @@ export async function getMe(): Promise<User> {
 }
 
 export async function fetchNoteById(id: string): Promise<Note> {
-  const response = await nextServer.get<Note>(`/notes/${id}`);
+  const cookieStore = await cookies();
+
+  const cookieHeader = cookieStore
+    .getAll()
+    .map(cookie => `${cookie.name}=${cookie.value}`)
+    .join('; ');
+
+  const response = await nextServer.get<Note>(`/notes/${id}`, {
+    headers: {
+      Cookie: cookieHeader,
+    },
+  });
 
   return response.data;
 }

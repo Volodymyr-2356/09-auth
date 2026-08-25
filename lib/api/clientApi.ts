@@ -1,5 +1,6 @@
 import type { Note, NoteTag } from '@/types/note';
 import { nextServer } from './api';
+import type { User } from '@/types/user';
 
 interface FetchNotesParams {
   page: number;
@@ -74,7 +75,7 @@ interface RegisterData {
   password: string;
 }
 
-export async function register(data: RegisterData) {
+export async function register(data: RegisterData): Promise<User> {
   const res = await nextServer.post('/auth/register', data);
   return res.data;
 }
@@ -84,22 +85,22 @@ interface LoginData {
   password: string;
 }
 
-export async function login(data: LoginData) {
+export async function login(data: LoginData): Promise<User> {
   const res = await nextServer.post('/auth/login', data);
   return res.data;
 }
 
-export async function checkSession() {
+export async function checkSession(): Promise<User> {
   const res = await nextServer.get('/auth/session');
   return res.data;
 }
 
-export async function getMe() {
+export async function getMe(): Promise<User> {
   const res = await nextServer.get('/users/me');
   return res.data;
 }
 
-export async function logout() {
+export async function logout(): Promise<void> {
   const res = await nextServer.post('/auth/logout');
   return res.data;
 }
@@ -108,7 +109,7 @@ interface UpdateProfileData {
   username: string;
 }
 
-export async function updateProfile(data: UpdateProfileData) {
+export async function updateProfile(data: UpdateProfileData): Promise<User> {
   const res = await nextServer.patch('/users/me', data);
   return res.data;
 }
