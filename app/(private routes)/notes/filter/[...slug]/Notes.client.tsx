@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import css from './NotesPage.module.css';
 import NoteList from '@/components/NoteList/NoteList';
-import { fetchNotes } from '@/lib/api';
+import { fetchNotes } from '@/lib/api/clientApi';
 import Pagination from '@/components/Pagination/Pagination';
 import SearchBox from '@/components/SearchBox/SearchBox';
 import { useQuery } from '@tanstack/react-query';
